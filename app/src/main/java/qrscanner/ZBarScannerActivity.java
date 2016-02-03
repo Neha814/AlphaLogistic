@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.widget.Toolbar;
@@ -34,6 +35,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     private Handler mAutoFocusHandler;
     private boolean mPreviewing = true;
     String codes="";
+     MediaPlayer mp;
     static {
         System.loadLibrary("iconv");
     }
@@ -44,6 +46,8 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setVisibility(View.GONE);
+
+      //  mp = MediaPlayer.create(this, R.raw.soho);
 
         if(!isCameraAvailable()) {
             // Cancel request if there is no rear-facing camera.
@@ -193,6 +197,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         mCamera.setParameters(p);
         mCamera.startPreview();
+        mp.start();
 
     }
 
@@ -201,6 +206,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         Camera.Parameters p = mCamera.getParameters();
         p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         mCamera.setParameters(p);
+        mp.stop();
        /* mCamera.stopPreview();
         mCamera.cancelAutoFocus();
         mCamera.setPreviewCallback(null);
