@@ -151,8 +151,10 @@ public class MainActivity extends AppCompatActivity
     private void ScanItems() {
         if (isCameraAvailable()) {
             Intent intent = new Intent(getApplicationContext(), ZBarScannerActivity.class);
-            intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.QRCODE});
-            //intent.putExtra(ZBarConstants.SCAN_MODES, "");
+            intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.QRCODE,Symbol.NONE
+            ,Symbol.PARTIAL,Symbol.EAN8,Symbol.UPCE,Symbol.ISBN10,Symbol.UPCA,Symbol.EAN13,
+                    Symbol.ISBN13,Symbol.I25,Symbol.DATABAR,Symbol.DATABAR_EXP,Symbol.CODABAR,Symbol.CODE39
+                    ,Symbol.PDF417,Symbol.CODE93,Symbol.CODE128});
             startActivityForResult(intent, ZBAR_SCANNER_REQUEST);
         } else {
             Toast.makeText(getApplicationContext(), "Rear Facing Camera Unavailable", Toast.LENGTH_SHORT).show();

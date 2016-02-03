@@ -6,9 +6,13 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Config;
@@ -16,6 +20,10 @@ import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
+
+import java.util.ArrayList;
+
+import alphalogistics.com.alphalogistics.R;
 
 public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants {
 
@@ -25,7 +33,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     private ImageScanner mScanner;
     private Handler mAutoFocusHandler;
     private boolean mPreviewing = true;
-
+    String codes="";
     static {
         System.loadLibrary("iconv");
     }
@@ -33,6 +41,9 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setVisibility(View.GONE);
 
         if(!isCameraAvailable()) {
             // Cancel request if there is no rear-facing camera.
@@ -73,6 +84,12 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     protected void onResume() {
         super.onResume();
 
+        OpenCamera();
+
+
+    }
+
+    private void OpenCamera() {
         // Open the default i.e. the first rear facing camera.
         mCamera = Camera.open();
         if(mCamera == null) {
@@ -91,6 +108,13 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     protected void onPause() {
         super.onPause();
 
+        RecreateSurface();
+
+
+    }
+
+    private void RecreateSurface() {
+         try {
         // Because the Camera object is a shared resource, it's very
         // important to release it when the activity is paused.
         if (mCamera != null) {
@@ -107,6 +131,10 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
             mPreviewing = false;
             mCamera = null;
+        }
+    } catch(Exception e){
+            e.printStackTrace();
+            Log.e("e=>",""+e);
         }
     }
 
@@ -131,25 +159,60 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
         int result = mScanner.scanImage(barcode);
 
-        if (result != 0) {
-            mCamera.cancelAutoFocus();
-            mCamera.setPreviewCallback(null);
-            mCamera.stopPreview();
-            mPreviewing = false;
-            SymbolSet syms = mScanner.getResults();
-            for (Symbol sym : syms) {
-                String symData = sym.getData();
-                if (!TextUtils.isEmpty(symData)) {
-                    Intent dataIntent = new Intent();
-                    dataIntent.putExtra(SCAN_RESULT, symData);
-                    dataIntent.putExtra(SCAN_RESULT_TYPE, sym.getType());
-                    setResult(Activity.RESULT_OK, dataIntent);
-                    finish();
-                    break;
+            if (result != 0) {
+                turnOnFlashLight();
+                /* mCamera.cancelAutoFocus();
+                 mCamera.setPreviewCallback(null);
+                  mCamera.release();
+                // mCamera.stopPreview();
+                 mPreviewing = false;*/
+                SymbolSet syms = mScanner.getResults();
+                Log.e("symset==>",""+syms);
+                for (Symbol sym : syms) {
+
+                    String symData = sym.getData();
+                    if (!TextUtils.isEmpty(symData)) {
+                        Intent dataIntent = new Intent();
+                        dataIntent.putExtra(SCAN_RESULT, symData);
+                        dataIntent.putExtra(SCAN_RESULT_TYPE, sym.getType());
+                        setResult(Activity.RESULT_OK, dataIntent);
+                        Log.e("symData==>", "" + symData);
+                        codes = symData + "\n" + codes;
+                        Toast.makeText(getApplicationContext(), codes, Toast.LENGTH_SHORT).show();
+                        // finish();
+                        syms = null;
+                        turnOffFlashLight();
+                        break;
+                    }
                 }
             }
-        }
     }
+
+    private void turnOnFlashLight() {
+        Camera.Parameters p = mCamera.getParameters();
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+        mCamera.setParameters(p);
+        mCamera.startPreview();
+
+    }
+
+    private void turnOffFlashLight() {
+
+        Camera.Parameters p = mCamera.getParameters();
+        p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+        mCamera.setParameters(p);
+       /* mCamera.stopPreview();
+        mCamera.cancelAutoFocus();
+        mCamera.setPreviewCallback(null);
+
+       // mCamera = Camera.open();
+        mCamera.startPreview();*/
+
+        RecreateSurface();
+        OpenCamera();
+
+    }
+
     private Runnable doAutoFocus = new Runnable() {
         public void run() {
             if(mCamera != null && mPreviewing) {
