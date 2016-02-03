@@ -1,57 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--<group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
-    </group>-->
-
-   <!-- <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>-->
-
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_sync"
-            android:title="Sync" />
+            android:title="Sync"
+           android:icon="@drawable/sync"/>
         <item
             android:id="@+id/nav_load_truck"
-            android:title="Load Truck" />
+            android:title="Load Truck"
+            android:icon="@drawable/load"/>
         <item
             android:id="@+id/nav_deliver"
-            android:title="Deliver" />
+            android:title="Deliver"
+            android:icon="@drawable/delivery"/>
         <item
             android:id="@+id/nav_directions"
-            android:title="Directions" />
+            android:title="Directions"
+            android:icon="@drawable/directios"/>
         <item
             android:id="@+id/nav_settings"
-            android:title="Settings" />
+            android:title="Settings"
+            android:icon="@drawable/setting"/>
         <item
             android:id="@+id/nav_warehouse"
-            android:title="Warehouse" />
+            android:title="Warehouse"
+            android:icon="@drawable/warehouse"/>
     </group>
 
 </menu>
