@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import net.sourceforge.zbar.Symbol;
 
+import Fragments.NavBluetoothScannerFragment;
 import Fragments.NavDeliverFragment;
 import Fragments.NavDiretionsFragment;
 import Fragments.NavLoadTruckFragment;
@@ -130,6 +131,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_warehouse) {
             fragment = new NavWarehouseFragment();
             title  = "Warehouse";
+        } else if(id == R.id.nav_btscanner){
+            fragment = new NavBluetoothScannerFragment();
+            title  = "Bluetooth Scanner";
         }
 
         if (fragment != null) {

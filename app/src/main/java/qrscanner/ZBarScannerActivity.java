@@ -44,8 +44,8 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setVisibility(View.GONE);
+        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setVisibility(View.GONE);*/
 
       //  mp = MediaPlayer.create(this, R.raw.soho);
 
@@ -197,7 +197,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         mCamera.setParameters(p);
         mCamera.startPreview();
-        mp.start();
+       // mp.start();
 
     }
 
@@ -206,7 +206,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         Camera.Parameters p = mCamera.getParameters();
         p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         mCamera.setParameters(p);
-        mp.stop();
+       // mp.stop();
        /* mCamera.stopPreview();
         mCamera.cancelAutoFocus();
         mCamera.setPreviewCallback(null);
