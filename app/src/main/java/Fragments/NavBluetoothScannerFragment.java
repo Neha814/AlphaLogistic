@@ -93,9 +93,9 @@ public class NavBluetoothScannerFragment extends Fragment implements View.OnClic
             for (BluetoothDevice device : pairedDevices) {
                 mDevice = device;
 
-                Log.e(TAG,"device="+mDevice);
+                Log.e(TAG,"device="+mDevice+" name="+mDevice.getName());
 
-                deviceName = deviceName+mDevice+"\n\n\n";
+                deviceName = deviceName+mDevice+" , "+mDevice.getName()+"\n\n\n";
 
             }
 

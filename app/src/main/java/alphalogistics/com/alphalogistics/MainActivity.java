@@ -66,6 +66,24 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         navigationView.getMenu().getItem(6).setChecked(true);
+        AddInitialFragmnet();
+    }
+
+    private void AddInitialFragmnet() {
+        Fragment fragment = null;
+        String title = "Bluetooth Scanner";
+            fragment = new NavBluetoothScannerFragment();
+
+        if (fragment != null) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_frame, fragment);
+            ft.commit();
+        }
+
+        // set the toolbar title
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
     }
 
     @Override
