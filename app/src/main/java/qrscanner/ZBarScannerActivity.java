@@ -2,7 +2,9 @@ package qrscanner;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -10,7 +12,11 @@ import android.os.Handler;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -22,11 +28,13 @@ import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import alphalogistics.com.alphalogistics.R;
 
-public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants {
+public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants ,
+        SurfaceHolder.Callback{
 
     private static final String TAG = "ZBarScannerActivity";
     private CameraPreview mPreview;
@@ -36,6 +44,9 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     private boolean mPreviewing = true;
     String codes="";
      MediaPlayer mp;
+    SurfaceHolder surfaceHolder;
+    SurfaceView surfaceView;
+    LayoutInflater controlInflater = null;
     static {
         System.loadLibrary("iconv");
     }
@@ -44,10 +55,26 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setContentView(R.layout.main);
+
+       /* Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setVisibility(View.GONE);*/
 
-      //  mp = MediaPlayer.create(this, R.raw.soho);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        getWindow().setFormat(PixelFormat.UNKNOWN);
+        surfaceView = (SurfaceView)findViewById(R.id.camerapreview);
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.addCallback(this);
+        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        controlInflater = LayoutInflater.from(getBaseContext());
+        View viewControl = controlInflater.inflate(R.layout.custom, null);
+        ViewGroup.LayoutParams layoutParamsControl = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
+                ViewGroup.LayoutParams.FILL_PARENT);
+        this.addContentView(viewControl, layoutParamsControl);
+
+
 
         if(!isCameraAvailable()) {
             // Cancel request if there is no rear-facing camera.
@@ -63,6 +90,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
         // Create and configure the ImageScanner;
         setupScanner();
+        mCamera.autoFocus(autoFocusCB);
 
         // Create a RelativeLayout container that will hold a SurfaceView,
         // and set it as the content of our activity.
@@ -233,4 +261,35 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
             mAutoFocusHandler.postDelayed(doAutoFocus, 1000);
         }
     };
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        if(mPreviewing){
+            mCamera.stopPreview();
+            mPreviewing = false;
+        }
+
+        if (mCamera != null){
+            try {
+                mCamera.setPreviewDisplay(surfaceHolder);
+                mCamera.startPreview();
+                mPreviewing = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        mCamera = Camera.open();
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        mCamera.stopPreview();
+        mCamera.release();
+        mCamera = null;
+        mPreviewing = false;
+    }
 }
