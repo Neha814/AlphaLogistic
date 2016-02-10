@@ -41,6 +41,8 @@ import java.util.Calendar;
 
 import alphalogistics.com.alphalogistics.R;
 import cz.msebera.android.httpclient.Header;
+import database.DatabaseHandler;
+import model.BarcodeData;
 
 public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants,
         View.OnClickListener{
@@ -234,12 +236,24 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
                     Toast.makeText(getApplicationContext(), symData, Toast.LENGTH_SHORT).show();
                     putDataInAnArray(symData);
+                    putDataInDb(symData);
                     syms = null;
                     turnOffFlashLight();
                     break;
                 }
             }
         }
+    }
+
+    private void putDataInDb(String symData) {
+        Calendar c = Calendar.getInstance();
+        System.out.println("Current time => " + c.getTime());
+        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        String formattedDate = df.format(c.getTime());
+
+        DatabaseHandler db = new DatabaseHandler(this);
+
+        db.addContact(new BarcodeData(symData, sp.getString("client_id",""),formattedDate,"37"));
     }
 
     private void putDataInAnArray(String scannedCode) {
