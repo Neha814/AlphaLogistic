@@ -27,7 +27,6 @@ import Fragments.NavLoadTruckFragment;
 import Fragments.NavSettingsFragment;
 import Fragments.NavSyncFragment;
 import Fragments.NavWarehouseFragment;
-import qrscanner.CustomCameraActivity;
 import qrscanner.ZBarConstants;
 import qrscanner.ZBarScannerActivity;
 
@@ -47,7 +46,11 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        fab.setVisibility(View.GONE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -66,14 +69,14 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        navigationView.getMenu().getItem(6).setChecked(true);
-        AddInitialFragmnet();
+        navigationView.getMenu().getItem(5).setChecked(true);
+        AddInitialFragment();
     }
 
-    private void AddInitialFragmnet() {
+    private void AddInitialFragment() {
         Fragment fragment = null;
-        String title = "Bluetooth Scanner";
-            fragment = new NavBluetoothScannerFragment();
+        fragment = new NavWarehouseFragment();
+        String title = "Warehouse";
 
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -86,6 +89,7 @@ public class MainActivity extends AppCompatActivity
             getSupportActionBar().setTitle(title);
         }
     }
+
 
     @Override
     public void onBackPressed() {
@@ -152,9 +156,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_warehouse) {
             fragment = new NavWarehouseFragment();
             title  = "Warehouse";
-        } else if(id == R.id.nav_btscanner){
+        }else if (id == R.id.nav_btscanner) {
             fragment = new NavBluetoothScannerFragment();
-            title  = "Bluetooth Scanner";
+            title  = "Bluetooth scanner";
         }
 
         if (fragment != null) {
@@ -175,15 +179,30 @@ public class MainActivity extends AppCompatActivity
 
     private void ScanItems() {
         if (isCameraAvailable()) {
-           /* Intent intent = new Intent(getApplicationContext(), ZBarScannerActivity.class);
-            intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.QRCODE,Symbol.NONE
-            ,Symbol.PARTIAL,Symbol.EAN8,Symbol.UPCE,Symbol.ISBN10,Symbol.UPCA,Symbol.EAN13,
-                    Symbol.ISBN13,Symbol.I25,Symbol.DATABAR,Symbol.DATABAR_EXP,Symbol.CODABAR,Symbol.CODE39
-                    ,Symbol.PDF417,Symbol.CODE93,Symbol.CODE128});
-            startActivityForResult(intent, ZBAR_SCANNER_REQUEST);*/
-
-            Intent i= new Intent(getApplicationContext(), CustomCameraActivity.class);
-            startActivity(i);
+            Intent intent = new Intent(getApplicationContext(), ZBarScannerActivity.class);
+            //intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.QRCODE});
+           /* public static final int NONE = 0;
+            public static final int PARTIAL = 1;
+            public static final int EAN8 = 8;
+            public static final int UPCE = 9;
+            public static final int ISBN10 = 10;
+            public static final int UPCA = 12;
+            public static final int EAN13 = 13;
+            public static final int ISBN13 = 14;
+            public static final int I25 = 25;
+            public static final int DATABAR = 34;
+            public static final int DATABAR_EXP = 35;
+            public static final int CODABAR = 38;
+            public static final int CODE39 = 39;
+            public static final int PDF417 = 57;
+            public static final int QRCODE = 64;
+            public static final int CODE93 = 93;
+            public static final int CODE128 = 128;*/
+            intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.QRCODE,Symbol.NONE,
+                    Symbol.PARTIAL,Symbol.EAN8,Symbol.UPCE,Symbol.ISBN10,Symbol.UPCA,Symbol.EAN13,
+                    Symbol.ISBN13,Symbol.I25,Symbol.DATABAR,Symbol.DATABAR_EXP,Symbol.CODABAR,
+                    Symbol.CODE39,Symbol.PDF417,Symbol.CODE128,Symbol.CODE93});
+            startActivityForResult(intent, ZBAR_SCANNER_REQUEST);
         } else {
             Toast.makeText(getApplicationContext(), "Rear Facing Camera Unavailable", Toast.LENGTH_SHORT).show();
         }

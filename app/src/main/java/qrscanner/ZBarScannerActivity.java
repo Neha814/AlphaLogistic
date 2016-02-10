@@ -1,40 +1,49 @@
 package qrscanner;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.provider.SyncStateContract;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 
 import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Config;
 import net.sourceforge.zbar.Image;
-import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
 
-import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import alphalogistics.com.alphalogistics.R;
+import cz.msebera.android.httpclient.Header;
 
-public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants ,
-        SurfaceHolder.Callback{
+public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants,
+        View.OnClickListener{
 
     private static final String TAG = "ZBarScannerActivity";
     private CameraPreview mPreview;
@@ -42,11 +51,22 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     private ImageScanner mScanner;
     private Handler mAutoFocusHandler;
     private boolean mPreviewing = true;
-    String codes="";
-     MediaPlayer mp;
-    SurfaceHolder surfaceHolder;
-    SurfaceView surfaceView;
-    LayoutInflater controlInflater = null;
+    String codes = "";
+    MediaPlayer mp;
+    ArrayList<String> scannedItems = new ArrayList<String>();
+    FrameLayout cameraPreview;
+
+    Button done_btn, back_btn, sync_btn;
+
+    SharedPreferences sp;
+
+    JSONArray array = new JSONArray();
+
+    Boolean isConnected;
+    private AsyncHttpClient client;
+    private ProgressDialog dialog;
+
+
     static {
         System.loadLibrary("iconv");
     }
@@ -55,47 +75,51 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.main);
+        // Hide the window title.
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-       /* Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setVisibility(View.GONE);*/
+        setContentView(R.layout.barcode_content);
 
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
-        getWindow().setFormat(PixelFormat.UNKNOWN);
-        surfaceView = (SurfaceView)findViewById(R.id.camerapreview);
-        surfaceHolder = surfaceView.getHolder();
-        surfaceHolder.addCallback(this);
-        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setVisibility(View.GONE);
 
-        controlInflater = LayoutInflater.from(getBaseContext());
-        View viewControl = controlInflater.inflate(R.layout.custom, null);
-        ViewGroup.LayoutParams layoutParamsControl = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT,
-                ViewGroup.LayoutParams.FILL_PARENT);
-        this.addContentView(viewControl, layoutParamsControl);
+        client = new AsyncHttpClient();
+        client.setTimeout(40*1000);
+        dialog = new ProgressDialog(ZBarScannerActivity.this);
+        dialog.setMessage("Loading..");
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
 
+        cameraPreview = (FrameLayout) findViewById(R.id.cameraPreview);
+        sync_btn = (Button) findViewById(R.id.sync_btn);
+        back_btn = (Button) findViewById(R.id.back_btn);
+        done_btn = (Button) findViewById(R.id.done_btn);
 
+        sync_btn.setOnClickListener(this);
+        back_btn.setOnClickListener(this);
+        done_btn.setOnClickListener(this);
 
-        if(!isCameraAvailable()) {
+        mp = MediaPlayer.create(ZBarScannerActivity.this,R.raw.beep);
+
+        if (!isCameraAvailable()) {
             // Cancel request if there is no rear-facing camera.
             cancelRequest();
             return;
         }
 
-        // Hide the window title.
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         mAutoFocusHandler = new Handler();
 
         // Create and configure the ImageScanner;
         setupScanner();
-        mCamera.autoFocus(autoFocusCB);
 
         // Create a RelativeLayout container that will hold a SurfaceView,
         // and set it as the content of our activity.
         mPreview = new CameraPreview(this, this, autoFocusCB);
-        setContentView(mPreview);
+        cameraPreview.addView(mPreview);
+      //  setContentView(mPreview);
     }
 
     public void setupScanner() {
@@ -124,7 +148,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     private void OpenCamera() {
         // Open the default i.e. the first rear facing camera.
         mCamera = Camera.open();
-        if(mCamera == null) {
+        if (mCamera == null) {
             // Cancel request if mCamera is null.
             cancelRequest();
             return;
@@ -146,27 +170,27 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     }
 
     private void RecreateSurface() {
-         try {
-        // Because the Camera object is a shared resource, it's very
-        // important to release it when the activity is paused.
-        if (mCamera != null) {
-            mPreview.setCamera(null);
-            mCamera.cancelAutoFocus();
-            mCamera.setPreviewCallback(null);
-            mCamera.stopPreview();
-            mCamera.release();
+        try {
+            // Because the Camera object is a shared resource, it's very
+            // important to release it when the activity is paused.
+            if (mCamera != null) {
+                mPreview.setCamera(null);
+                mCamera.cancelAutoFocus();
+                mCamera.setPreviewCallback(null);
+                mCamera.stopPreview();
+                mCamera.release();
 
-            // According to Jason Kuang on http://stackoverflow.com/questions/6519120/how-to-recover-camera-preview-from-sleep,
-            // there might be surface recreation problems when the device goes to sleep. So lets just hide it and
-            // recreate on resume
-            mPreview.hideSurfaceView();
+                // According to Jason Kuang on http://stackoverflow.com/questions/6519120/how-to-recover-camera-preview-from-sleep,
+                // there might be surface recreation problems when the device goes to sleep. So lets just hide it and
+                // recreate on resume
+                mPreview.hideSurfaceView();
 
-            mPreviewing = false;
-            mCamera = null;
-        }
-    } catch(Exception e){
+                mPreviewing = false;
+                mCamera = null;
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            Log.e("e=>",""+e);
+            Log.e("e=>", "" + e);
         }
     }
 
@@ -191,33 +215,53 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
         int result = mScanner.scanImage(barcode);
 
-            if (result != 0) {
-                turnOnFlashLight();
-                /* mCamera.cancelAutoFocus();
-                 mCamera.setPreviewCallback(null);
-                  mCamera.release();
-                // mCamera.stopPreview();
-                 mPreviewing = false;*/
-                SymbolSet syms = mScanner.getResults();
-                Log.e("symset==>",""+syms);
-                for (Symbol sym : syms) {
+        if (result != 0) {
+            turnOnFlashLight();
 
-                    String symData = sym.getData();
-                    if (!TextUtils.isEmpty(symData)) {
-                        Intent dataIntent = new Intent();
-                        dataIntent.putExtra(SCAN_RESULT, symData);
-                        dataIntent.putExtra(SCAN_RESULT_TYPE, sym.getType());
-                        setResult(Activity.RESULT_OK, dataIntent);
-                        Log.e("symData==>", "" + symData);
-                        codes = symData + "\n" + codes;
-                        Toast.makeText(getApplicationContext(), codes, Toast.LENGTH_SHORT).show();
-                        // finish();
-                        syms = null;
-                        turnOffFlashLight();
-                        break;
-                    }
+            SymbolSet syms = mScanner.getResults();
+            Log.e("symset==>", "" + syms);
+            for (Symbol sym : syms) {
+
+                String symData = sym.getData();
+                if (!TextUtils.isEmpty(symData)) {
+                    Intent dataIntent = new Intent();
+                    dataIntent.putExtra(SCAN_RESULT, symData);
+                    dataIntent.putExtra(SCAN_RESULT_TYPE, sym.getType());
+                    setResult(Activity.RESULT_OK, dataIntent);
+                    Log.e("symData==>", "" + symData);
+                    codes = symData + "\n" + codes;
+
+
+                    Toast.makeText(getApplicationContext(), symData, Toast.LENGTH_SHORT).show();
+                    putDataInAnArray(symData);
+                    syms = null;
+                    turnOffFlashLight();
+                    break;
                 }
             }
+        }
+    }
+
+    private void putDataInAnArray(String scannedCode) {
+
+        JSONObject object = new JSONObject();
+        try{
+            //{Barcode:'1234',DriverID:'99',Modified:'02-06-2016',ActivityTypeID:'37'}
+
+            Calendar c = Calendar.getInstance();
+            System.out.println("Current time => " + c.getTime());
+
+            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+            String formattedDate = df.format(c.getTime());
+
+            object.put("Barcode", scannedCode);
+            object.put("DriverID", sp.getString("client_id",""));
+            object.put("Modified", formattedDate);
+            object.put("ActivityTypeID", "37");
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        array.put(object);
     }
 
     private void turnOnFlashLight() {
@@ -225,7 +269,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
         mCamera.setParameters(p);
         mCamera.startPreview();
-       // mp.start();
+        mp.start();
 
     }
 
@@ -235,12 +279,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         mCamera.setParameters(p);
        // mp.stop();
-       /* mCamera.stopPreview();
-        mCamera.cancelAutoFocus();
-        mCamera.setPreviewCallback(null);
 
-       // mCamera = Camera.open();
-        mCamera.startPreview();*/
 
         RecreateSurface();
         OpenCamera();
@@ -249,7 +288,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
     private Runnable doAutoFocus = new Runnable() {
         public void run() {
-            if(mCamera != null && mPreviewing) {
+            if (mCamera != null && mPreviewing) {
                 mCamera.autoFocus(autoFocusCB);
             }
         }
@@ -263,33 +302,81 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     };
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        if(mPreviewing){
-            mCamera.stopPreview();
-            mPreviewing = false;
-        }
+    public void onClick(View v) {
+      if(v==back_btn){
+          finish();
+      }else if(v==done_btn){
 
-        if (mCamera != null){
-            try {
-                mCamera.setPreviewDisplay(surfaceHolder);
-                mCamera.startPreview();
-                mPreviewing = true;
-            } catch (IOException e) {
-                e.printStackTrace();
+      }else if(v==sync_btn){
+          if(array.length()<1){
+              Toast.makeText(getApplicationContext(), "No data available to sync.", Toast.LENGTH_SHORT).show();
+          } else {
+              submitScannedData();
+          }
+      }
+    }
+
+    //*************************** API ******************************************
+
+    private void submitScannedData() {
+
+        RequestParams params = new RequestParams();
+        params.put("Post",array.toString());
+     //   client.addHeader("Content-Type","application/json");
+
+        Log.e("parameters", params.toString());
+
+        client.post(getApplicationContext(), "http://ship2.als-otg.com/api/AddSortingFacilityBarcodes3/", params, new JsonHttpResponseHandler() {
+
+            @Override
+            public void onStart() {
+                super.onStart();
+                dialog.show();
             }
-        }
-    }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        mCamera = Camera.open();
-    }
+            @Override
+            public void onFinish() {
+                super.onFinish();
+                dialog.dismiss();
+            }
 
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        mCamera.stopPreview();
-        mCamera.release();
-        mCamera = null;
-        mPreviewing = false;
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
+                try {
+                    Log.e(TAG, ""+response);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Log.e(TAG, responseString + "/" + statusCode);
+                // idhr aaa rha h  wait
+                if (headers != null && headers.length > 0) {
+                    for (int i = 0; i < headers.length; i++)
+                        Log.e("here", headers[i].getName() + "//" + headers[i].getValue());
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.e(TAG, "/" + statusCode);
+                if (headers != null && headers.length > 0) {
+                    for (int i = 0; i < headers.length; i++)
+                        Log.e("here", headers[i].getName() + "//" + headers[i].getValue());
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+                Log.e(TAG, "/" + statusCode);
+                if (headers != null && headers.length > 0) {
+                    for (int i = 0; i < headers.length; i++)
+                        Log.e("here", headers[i].getName() + "//" + headers[i].getValue());
+                }
+            }
+        });
     }
 }

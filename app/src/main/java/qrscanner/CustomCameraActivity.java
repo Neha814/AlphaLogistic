@@ -30,7 +30,7 @@ import java.io.IOException;
 import alphalogistics.com.alphalogistics.R;
 
 /**
- * Created by nehabh on 2/8/2016.
+ * Created by Neha on 2/8/2016.
  */
 public class CustomCameraActivity extends Activity implements SurfaceHolder.Callback, Camera.PreviewCallback, ZBarConstants {
 
@@ -43,7 +43,7 @@ public class CustomCameraActivity extends Activity implements SurfaceHolder.Call
     String codes="";
     private Handler mAutoFocusHandler;
     private boolean mPreviewing = true;
-  //  private Camera mCamera;
+    //  private Camera mCamera;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +69,7 @@ public class CustomCameraActivity extends Activity implements SurfaceHolder.Call
 
         setupScanner();
         mAutoFocusHandler = new Handler();
+
     }
 
     @Override
@@ -127,7 +128,7 @@ public class CustomCameraActivity extends Activity implements SurfaceHolder.Call
         int result = mScanner.scanImage(barcode);
 
         if (result != 0) {
-        //    turnOnFlashLight();
+            //    turnOnFlashLight();
                 /* mCamera.cancelAutoFocus();
                  mCamera.setPreviewCallback(null);
                   mCamera.release();
@@ -148,7 +149,7 @@ public class CustomCameraActivity extends Activity implements SurfaceHolder.Call
                     Toast.makeText(getApplicationContext(), codes, Toast.LENGTH_SHORT).show();
                     // finish();
                     syms = null;
-                //    turnOffFlashLight();
+                    //    turnOffFlashLight();
                     break;
                 }
             }
@@ -160,7 +161,6 @@ public class CustomCameraActivity extends Activity implements SurfaceHolder.Call
             mCamera.setParameters(p);
             mCamera.startPreview();
             // mp.start();
-
         }*/
 
 

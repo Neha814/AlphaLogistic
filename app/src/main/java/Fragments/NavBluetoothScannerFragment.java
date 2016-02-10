@@ -53,7 +53,7 @@ public class NavBluetoothScannerFragment extends Fragment implements View.OnClic
         // Phone does not support Bluetooth so let the user know and exit.
         //Determine if Android supports Bluetooth
         if (BTAdapter == null) {
-            Log.e("if","if");
+            Log.e("if", "if");
             new AlertDialog.Builder(getActivity())
                     .setTitle("Not compatible")
                     .setMessage("Your phone does not support Bluetooth")
@@ -76,7 +76,7 @@ public class NavBluetoothScannerFragment extends Fragment implements View.OnClic
        /* form the connection between the Android and the bluetooth scanner device*/
                 // creating the connection thread
 
-                Log.e(TAG, "device=>"+mDevice);
+                Log.e(TAG, "device=>" + mDevice);
                 mConnectThread = new ConnectThread(mDevice);
                 mConnectThread.start();
             }
@@ -93,8 +93,9 @@ public class NavBluetoothScannerFragment extends Fragment implements View.OnClic
             for (BluetoothDevice device : pairedDevices) {
                 mDevice = device;
 
-                Log.e(TAG,"device="+mDevice+" name="+mDevice.getName());
+                Log.e(TAG, "device=" + mDevice);
 
+               // deviceName = deviceName + mDevice + "\n\n\n";
                 deviceName = deviceName+mDevice+" , "+mDevice.getName()+"\n\n\n";
 
             }
@@ -154,9 +155,9 @@ public class NavBluetoothScannerFragment extends Fragment implements View.OnClic
         @Override
         public void handleMessage(Message msg) {
             byte[] writeBuf = (byte[]) msg.obj;
-            int begin = (int)msg.arg1;
-            int end = (int)msg.arg2;
-            switch(msg.what) {
+            int begin = (int) msg.arg1;
+            int end = (int) msg.arg2;
+            switch (msg.what) {
                 case 1:
                     String writeMessage = new String(writeBuf);
                     writeMessage = writeMessage.substring(begin, end);
@@ -227,18 +228,17 @@ public class NavBluetoothScannerFragment extends Fragment implements View.OnClic
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Log.e(TAG,"requestCode="+requestCode+" resultCode=>"+resultCode+" data=>"+data);
+        Log.e(TAG, "requestCode=" + requestCode + " resultCode=>" + resultCode + " data=>" + data);
 
-        if(BTAdapter.isEnabled()){
+        if (BTAdapter.isEnabled()) {
             getBluetoothDevices();
 
        /* form the connection between the Android and the bluetooth scanner device*/
             // creating the connection thread
 
-            Log.e(TAG, "device=>"+mDevice);
+            Log.e(TAG, "device=>" + mDevice);
             mConnectThread = new ConnectThread(mDevice);
             mConnectThread.start();
         }
     }
 }
-

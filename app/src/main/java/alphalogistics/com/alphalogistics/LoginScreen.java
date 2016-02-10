@@ -2,7 +2,9 @@ package alphalogistics.com.alphalogistics;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,10 +22,10 @@ import functions.StringUtils;
  */
 public class LoginScreen extends AppCompatActivity implements View.OnClickListener {
 
-    TextInputLayout client_id_layout;
+  //  TextInputLayout client_id_layout;
     EditText client_id_edt;
     Button login_btn;
-    PrefStore sp;
+    SharedPreferences sp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,19 +33,17 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
 
         setContentView(R.layout.login);
 
-        sp = new PrefStore(getApplicationContext());
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        // set the toolbar title
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Login");
-        }
+        toolbar.setTitle("Sign In");
+
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         inIt();
     }
 
     private void inIt() {
         client_id_edt = (EditText) findViewById(R.id.client_id_edt);
-        client_id_layout = (TextInputLayout) findViewById(R.id.client_id_layout);
+      //  client_id_layout = (TextInputLayout) findViewById(R.id.client_id_layout);
         login_btn = (Button) findViewById(R.id.login_btn);
 
         login_btn.setOnClickListener(this);
@@ -74,7 +74,8 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         @Override
         public void afterTextChanged(Editable s) {
             if (client_id_edt.getText().hashCode() == s.hashCode()) {
-                client_id_layout.setError(null);
+               // client_id_layout.setError(null);
+                client_id_edt.setError(null);
             }
 
         }
@@ -90,12 +91,14 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
 
     private void CheckValidations() {
         if (StringUtils.getLength(client_id_edt) > 0) {
-            sp.SaveClientID(StringUtils.getText(client_id_edt));
+            SharedPreferences.Editor e = sp.edit();
+            e.putString("client_id",client_id_edt.getText().toString());
+            e.commit();
             Intent i = new Intent(LoginScreen.this, MainActivity.class);
             startActivity(i);
             finish();
         } else {
-            client_id_layout.setError("Please enter client id.");
+            client_id_edt.setError("Please enter client id.");
         }
     }
 }
