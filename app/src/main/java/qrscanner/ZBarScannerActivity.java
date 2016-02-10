@@ -302,7 +302,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         Camera.Parameters p = mCamera.getParameters();
         p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         mCamera.setParameters(p);
-       // mp.stop();
+
 
 
         RecreateSurface();
