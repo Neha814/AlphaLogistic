@@ -41,7 +41,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_BARCODE + " TEXT,"
-                + KEY_DRIVERID + " TEXT"+ KEY_MODIFIED + " TEXT," + KEY_ACTIVITY_TYPEID + " TEXT"+ ")";
+                + KEY_DRIVERID + " TEXT,"+ KEY_MODIFIED + " TEXT," + KEY_ACTIVITY_TYPEID + " TEXT"+ ")";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
     }
@@ -69,5 +69,32 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // Inserting Row
         db.insert(TABLE_CONTACTS, null, values);
         db.close(); // Closing database connection
+    }
+
+
+    public List<BarcodeData> getAllContacts() {
+        List<BarcodeData> contactList = new ArrayList<BarcodeData>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_CONTACTS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                BarcodeData contact = new BarcodeData();
+                contact.setId(Integer.parseInt(cursor.getString(0)));
+                contact.setBarcode(cursor.getString(1));
+                contact.setDriverId(cursor.getString(2));
+                contact.setModified(cursor.getString(3));
+                contact.setActivityTypeId(cursor.getString(4));
+                // Adding contact to list
+                contactList.add(contact);
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return contactList;
     }
 }

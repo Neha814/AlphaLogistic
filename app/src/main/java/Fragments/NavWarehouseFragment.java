@@ -4,13 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,8 +23,15 @@ import android.widget.Toast;
 import net.sourceforge.zbar.Symbol;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import alphalogistics.com.alphalogistics.R;
+import database.DatabaseHandler;
+import model.BarcodeData;
 import qrscanner.ZBarConstants;
 import qrscanner.ZBarScannerActivity;
 
@@ -32,6 +44,13 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
     private static final int ZBAR_SCANNER_REQUEST = 0;
     Spinner warehouse_spinner;
     MyAdapter mAdapter;
+    MyAdapter1 mAdapter1;
+    List<BarcodeData> contacts = new ArrayList<BarcodeData>();
+    LinearLayout listview;
+    View view;
+    LinearLayout ll;
+
+
 
     @Nullable
     @Override
@@ -44,6 +63,9 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
     private void initialise() {
         camerascan_btn = (Button) rootView.findViewById(R.id.camerascan_btn);
         warehouse_spinner = (Spinner) rootView.findViewById(R.id.warehouse_spinner);
+        listview = (LinearLayout) rootView.findViewById(R.id.listview);
+        view = (View) rootView.findViewById(R.id.view);
+        ll = (LinearLayout) rootView.findViewById(R.id.ll);
 
         camerascan_btn.setOnClickListener(this);
 
@@ -56,6 +78,45 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
         mAdapter = new MyAdapter(getActivity(),
                 menuItems);
         warehouse_spinner.setAdapter(mAdapter);
+
+        RetreiveAllData();
+    }
+
+    private void RetreiveAllData() {
+        DatabaseHandler db = new DatabaseHandler(getActivity());
+        contacts = db.getAllContacts();
+
+
+        if(contacts.size()>0){
+            // setAdpater
+            listview.setVisibility(View.VISIBLE);
+            view.setVisibility(View.VISIBLE);
+            ll.setVisibility(View.VISIBLE);
+
+            for (int i=0;i<contacts.size();i++) {
+                String log = "Id: "+contacts.get(i).getId()+" ,barcode: " + contacts.get(i).getBarcode() +
+                        " ,driver id: " + contacts.get(i).getDriverId()+
+                        " ,modified: "+contacts.get(i).getModified()+" ,activity type id: "+contacts.get(i).getActivityTypeId();
+                // Writing Contacts to log
+                Log.d("Name: ", log);
+
+                LayoutInflater inflater = null;
+                inflater = (LayoutInflater) getActivity()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View mLinearView = inflater.inflate(R.layout.warehouse_listitem, null);
+                TextView barcode_text = (TextView) mLinearView.findViewById(R.id.barcode_text);
+                barcode_text.setText(contacts.get(i).getBarcode());
+
+                listview.addView(mLinearView);
+            }
+
+
+
+        } else {
+            listview.setVisibility(View.GONE);
+            view.setVisibility(View.GONE);
+            ll.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -140,4 +201,60 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
         }
 
     }
+
+    class MyAdapter1 extends BaseAdapter {
+
+        LayoutInflater mInflater = null;
+
+        public MyAdapter1(FragmentActivity activity, List<BarcodeData> contacts) {
+            mInflater = LayoutInflater.from(getActivity());
+        }
+
+
+        @Override
+        public int getCount() {
+
+            return contacts.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return contacts.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            // TODO Auto-generated method stub
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+
+            if (convertView == null) {
+                holder = new ViewHolder();
+                convertView = mInflater.inflate(R.layout.warehouse_listitem,
+                        null);
+
+                holder.barcode_text = (TextView) convertView.findViewById(R.id.barcode_text);
+
+                convertView.setTag(holder);
+
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            Log.e("size==>",""+contacts.size());
+            holder.barcode_text.setText(contacts.get(position).getBarcode());
+
+            return convertView;
+        }
+
+        class ViewHolder {
+            TextView barcode_text;
+        }
+
+    }
+
 }
