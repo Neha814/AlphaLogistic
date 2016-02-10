@@ -1,7 +1,10 @@
 package qrscanner;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -38,6 +41,7 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import alphalogistics.com.alphalogistics.R;
 import cz.msebera.android.httpclient.Header;
@@ -68,6 +72,8 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
     private AsyncHttpClient client;
     private ProgressDialog dialog;
 
+    DatabaseHandler db ;
+
 
     static {
         System.loadLibrary("iconv");
@@ -84,6 +90,8 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         setContentView(R.layout.barcode_content);
 
         sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        db = new DatabaseHandler(this);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setVisibility(View.GONE);
@@ -235,7 +243,6 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
 
                     Toast.makeText(getApplicationContext(), symData, Toast.LENGTH_SHORT).show();
-                    putDataInAnArray(symData);
                     putDataInDb(symData);
                     syms = null;
                     turnOffFlashLight();
@@ -251,31 +258,34 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         String formattedDate = df.format(c.getTime());
 
-        DatabaseHandler db = new DatabaseHandler(this);
-
-        db.addContact(new BarcodeData(symData, sp.getString("client_id",""),formattedDate,"37"));
+        db.addContact(new BarcodeData(symData, sp.getString("client_id", ""), formattedDate, "37"));
     }
 
-    private void putDataInAnArray(String scannedCode) {
+    private void putDataInAnArray() {
+        DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+        List<BarcodeData> contacts = db.getAllContacts();
+        for(int i=0;i<contacts.size();i++){
+            JSONObject object = new JSONObject();
+            try{
+                //{Barcode:'1234',DriverID:'99',Modified:'02-06-2016',ActivityTypeID:'37'}
 
-        JSONObject object = new JSONObject();
-        try{
-            //{Barcode:'1234',DriverID:'99',Modified:'02-06-2016',ActivityTypeID:'37'}
+                Calendar c = Calendar.getInstance();
+                System.out.println("Current time => " + c.getTime());
 
-            Calendar c = Calendar.getInstance();
-            System.out.println("Current time => " + c.getTime());
+                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                String formattedDate = df.format(c.getTime());
 
-            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-            String formattedDate = df.format(c.getTime());
-
-            object.put("Barcode", scannedCode);
-            object.put("DriverID", sp.getString("client_id",""));
-            object.put("Modified", formattedDate);
-            object.put("ActivityTypeID", "37");
-        } catch(Exception e){
-            e.printStackTrace();
+                object.put("Barcode", contacts.get(i).getBarcode());
+                object.put("DriverID", contacts.get(i).getDriverId());
+                object.put("Modified", contacts.get(i).getModified());
+                object.put("ActivityTypeID",contacts.get(i).getActivityTypeId());
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            array.put(object);
         }
-        array.put(object);
+
+        submitScannedData();
     }
 
     private void turnOnFlashLight() {
@@ -320,12 +330,15 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
       if(v==back_btn){
           finish();
       }else if(v==done_btn){
-
+          finish();
       }else if(v==sync_btn){
-          if(array.length()<1){
+          DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+          List<BarcodeData> contacts = db.getAllContacts();
+          if(contacts.size()<1){
               Toast.makeText(getApplicationContext(), "No data available to sync.", Toast.LENGTH_SHORT).show();
           } else {
-              submitScannedData();
+              putDataInAnArray();
+
           }
       }
     }
@@ -372,6 +385,10 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
                     for (int i = 0; i < headers.length; i++)
                         Log.e("here", headers[i].getName() + "//" + headers[i].getValue());
                 }
+
+                db.deleteWholeData();
+                showDialog("Data synced successfully.", ZBarScannerActivity.this);
+
             }
 
             @Override
@@ -392,5 +409,34 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
                 }
             }
         });
+    }
+
+    public void showDialog(String msg, Context context) {
+        try {
+            AlertDialog alertDialog = new AlertDialog.Builder(
+                    context).create();
+
+
+            // Setting Dialog Message
+            alertDialog.setMessage(msg);
+
+            // Setting Icon to Dialog
+            //	alertDialog.setIcon(R.drawable.browse);
+
+            // Setting OK Button
+            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    // Write your code here to execute after dialog closed
+                    dialog.cancel();
+                    finish();
+                }
+            });
+
+            // Showing Alert Message
+            alertDialog.show();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

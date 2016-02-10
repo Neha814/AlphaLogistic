@@ -44,7 +44,7 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
     private static final int ZBAR_SCANNER_REQUEST = 0;
     Spinner warehouse_spinner;
     MyAdapter mAdapter;
-    MyAdapter1 mAdapter1;
+    //MyAdapter1 mAdapter1;
     List<BarcodeData> contacts = new ArrayList<BarcodeData>();
     LinearLayout listview;
     View view;
@@ -58,6 +58,13 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
         rootView = inflater.inflate(R.layout.warehouse_fragment, container, false);
         initialise();
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.e("Resume", "Resume");
+        RetreiveAllData();
     }
 
     private void initialise() {
@@ -79,10 +86,11 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
                 menuItems);
         warehouse_spinner.setAdapter(mAdapter);
 
-        RetreiveAllData();
     }
 
     private void RetreiveAllData() {
+
+        listview.removeAllViews();
         DatabaseHandler db = new DatabaseHandler(getActivity());
         contacts = db.getAllContacts();
 
@@ -202,7 +210,7 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
 
     }
 
-    class MyAdapter1 extends BaseAdapter {
+    /*class MyAdapter1 extends BaseAdapter {
 
         LayoutInflater mInflater = null;
 
@@ -255,6 +263,6 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
             TextView barcode_text;
         }
 
-    }
+    }*/
 
 }

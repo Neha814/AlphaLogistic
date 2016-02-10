@@ -97,4 +97,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // return contact list
         return contactList;
     }
+
+    // Deleting all contacts
+    public void deleteWholeData() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CONTACTS, null, null);
+        db.close();
+    }
+
+    // Deleting single contact
+    public void deleteSingleData(BarcodeData contact) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_CONTACTS, KEY_ID + " = ?",
+                new String[] { String.valueOf(contact.getId()) });
+        db.close();
+    }
 }

@@ -1,5 +1,8 @@
 package functions;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.widget.EditText;
 
 /**
@@ -18,5 +21,31 @@ public class StringUtils {
         return et.getText().toString();
     }
 
+    public static void showDialog(String msg, Context context) {
+        try {
+            AlertDialog alertDialog = new AlertDialog.Builder(
+                    context).create();
 
+
+            // Setting Dialog Message
+            alertDialog.setMessage(msg);
+
+            // Setting Icon to Dialog
+            //	alertDialog.setIcon(R.drawable.browse);
+
+            // Setting OK Button
+            alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    // Write your code here to execute after dialog closed
+                    dialog.cancel();
+                }
+            });
+
+            // Showing Alert Message
+            alertDialog.show();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
 }
