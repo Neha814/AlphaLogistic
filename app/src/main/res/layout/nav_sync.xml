@@ -68,6 +68,7 @@
                     android:orientation="horizontal"
                     android:layout_height="wrap_content">
                     <Button
+                        android:id="@+id/sync_routes_btn"
                         android:layout_width="wrap_content"
                         android:layout_height="35dp"
                         android:text="Sync Routes"
@@ -152,6 +153,8 @@
                 android:layout_height="1dp"
                 android:background="#D1CCCB"/>
 
+
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:padding="20dp"
@@ -174,6 +177,26 @@
             </LinearLayout>
 
             <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D1CCCB"/>
+            <LinearLayout
+                android:id="@+id/ll"
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/listview"/>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/view"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#D1CCCB"/>
@@ -286,6 +309,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#D1CCCB"/>
+
 
             <TextView
                 android:layout_width="wrap_content"

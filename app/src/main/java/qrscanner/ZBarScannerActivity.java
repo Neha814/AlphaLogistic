@@ -46,6 +46,8 @@ import java.util.List;
 import alphalogistics.com.alphalogistics.R;
 import cz.msebera.android.httpclient.Header;
 import database.DatabaseHandler;
+import functions.NetConnection;
+import functions.StringUtils;
 import model.BarcodeData;
 
 public class ZBarScannerActivity extends Activity implements Camera.PreviewCallback, ZBarConstants,
@@ -86,6 +88,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         // Hide the window title.
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        isConnected = NetConnection.checkInternetConnectionn(getApplicationContext());
 
         setContentView(R.layout.barcode_content);
 
@@ -285,7 +288,11 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
             array.put(object);
         }
 
-        submitScannedData();
+        if(isConnected) {
+            submitScannedData();
+        }else {
+            StringUtils.showDialog("No internet connecyion.Please try again",getApplicationContext());
+        }
     }
 
     private void turnOnFlashLight() {
