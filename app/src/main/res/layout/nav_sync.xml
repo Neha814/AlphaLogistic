@@ -57,6 +57,24 @@
                 android:background="#D1CCCB"/>
 
             <LinearLayout
+                android:id="@+id/ll2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/green">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="18dp"
+                    android:textStyle="bold"
+                    android:text="Your routes have synced."/>
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:padding="20dp"
                 android:gravity="center_vertical"
@@ -123,6 +141,62 @@
                 android:background="#D1CCCB"/>
 
             <LinearLayout
+                android:id="@+id/ll"
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp">
+                    <TextView
+                        android:id="@+id/route_tv"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="left"
+                        android:textStyle="bold"
+                        android:layout_height="wrap_content"
+                        android:text="ROUTE" />
+
+                    <TextView
+                        android:id="@+id/stop_tv"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:textStyle="bold"
+                        android:gravity="center_horizontal"
+                        android:layout_height="wrap_content"
+                        android:text="STOP" />
+
+                    <TextView
+                        android:id="@+id/peices_tv"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right"
+                        android:textStyle="bold"
+                        android:layout_height="wrap_content"
+                        android:text="PEICES" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/listview"/>
+            </LinearLayout>
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#D1CCCB"/>
+
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:padding="20dp"
                 android:gravity="center_vertical"
@@ -177,26 +251,6 @@
             </LinearLayout>
 
             <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#D1CCCB"/>
-            <LinearLayout
-                android:id="@+id/ll"
-                android:layout_width="match_parent"
-                android:padding="10dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:id="@+id/listview"/>
-            </LinearLayout>
-
-            <View
-                android:id="@+id/view"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#D1CCCB"/>

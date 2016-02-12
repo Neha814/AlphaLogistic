@@ -3,31 +3,24 @@ package Fragments;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Typeface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
-import android.support.annotation.Nullable;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import net.sourceforge.zbar.Symbol;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -35,14 +28,13 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
-import java.util.zip.GZIPOutputStream;
+
 
 import alphalogistics.com.alphalogistics.R;
 import cz.msebera.android.httpclient.Header;
 import functions.NetConnection;
-import qrscanner.ZBarConstants;
-import qrscanner.ZBarScannerActivity;
 
 /**
  * Created by Neha on 1/31/2016.
@@ -64,13 +56,15 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
     private ProgressDialog dialog;
 
     LinearLayout listview;
-    LinearLayout ll;
+    LinearLayout ll,ll2;
 
     String TAG = "NavSyncFragment" ;
     View view;
 
+    SharedPreferences sp;
 
-    @Nullable
+    ArrayList<HashMap<String, String>> SyncRoutesList = new ArrayList<HashMap<String, String>>();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.nav_sync, container, false);
@@ -79,7 +73,7 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
     }
 
     private void initialise() {
-
+        sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         isConnected = NetConnection.checkInternetConnectionn(getActivity());
         client = new AsyncHttpClient();
         client.setTimeout(40*1000);
@@ -92,13 +86,13 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
         sync_routes_btn = (Button) rootView.findViewById(R.id.sync_routes_btn);
         listview = (LinearLayout) rootView.findViewById(R.id.listview);
         ll = (LinearLayout) rootView.findViewById(R.id.ll);
+        ll2 = (LinearLayout) rootView.findViewById(R.id.ll2);
         view = (View) rootView.findViewById(R.id.view);
 
 
         view.setVisibility(View.GONE);
         ll.setVisibility(View.GONE);
-
-
+        ll2.setVisibility(View.GONE);
 
         date_edt.setClickable(true);
         date_edt.setFocusable(false);
@@ -157,49 +151,36 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if(v==sync_routes_btn){
             listview.removeAllViews();
-            view.setVisibility(View.VISIBLE);
-            ll.setVisibility(View.VISIBLE);
 
-           // getSyncRoutes();
 
-            for (int i=0;i<5;i++) {
+            String inputDate = date_edt.getText().toString();
+            String inputFormat = "dd MMM yyyy";
+            String outputFormat = "yyyy-MM-dd";    //2016-02-10
 
-                LayoutInflater inflater = null;
-                inflater = (LayoutInflater) getActivity()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View mLinearView = inflater.inflate(R.layout.warehouse_listitem, null);
-                TextView barcode_text = (TextView) mLinearView.findViewById(R.id.barcode_text);
-             if(i==0)
-                 barcode_text.setText("1122365467878464");
+            String dateToSend = functions.StringUtils.formateDateFromstring(inputFormat, outputFormat, inputDate);
 
-                if(i==1)
-                    barcode_text.setText("687675465654654");
-
-                if(i==2)
-                    barcode_text.setText("35436547687575776");
-
-                if(i==3)
-                    barcode_text.setText("54657567676765777");
-
-                if(i==4)
-                    barcode_text.setText("4354365657567567");
-
-                listview.addView(mLinearView);
+            if(isConnected) {
+                getSyncRoutes(dateToSend);
+            } else {
+                functions.StringUtils.showDialog("No internet connection.",getActivity());
             }
         }
     }
 
     //*************************** API ******************************************
 
-    private void getSyncRoutes() {
+    private void getSyncRoutes(String dateToSend) {
+
+        // http://ship2.als-otg.com/api/GetDeliveryDetailsByDate3/5678/2016-02-10
 
         RequestParams params = new RequestParams();
         params.put("","");
-        //   client.addHeader("Content-Type","application/json");
 
-        Log.e("parameters", params.toString());
+        Log.e("date", dateToSend);
+        Log.e("client_id", sp.getString("client_id",""));
 
-        client.post(getActivity(), "http://ship2.als-otg.com/api/AddSortingFacilityBarcodes3/", params, new JsonHttpResponseHandler() {
+        client.post(getActivity(), "http://ship2.als-otg.com/api/GetDeliveryDetailsByDate3/"+
+                sp.getString("client_id","")+"/"+dateToSend, params, new JsonHttpResponseHandler() {
 
             @Override
             public void onStart() {
@@ -217,7 +198,26 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 try {
+                    view.setVisibility(View.VISIBLE);
+                    ll.setVisibility(View.VISIBLE);
+                    ll2.setVisibility(View.VISIBLE);
                     Log.e(TAG, ""+response);
+                    JSONArray array = response.getJSONArray("Table");
+                    int size = array.length();
+                    for(int i=0;i<size;i++){
+                        HashMap<String, String> map = new HashMap<String, String>();
+                        map.put("user1",array.getJSONObject(i).getString("user1"));
+                        map.put("Route",array.getJSONObject(i).getString("Route"));
+                        map.put("StopNum",array.getJSONObject(i).getString("StopNum"));
+                        map.put("TrackingID",array.getJSONObject(i).getString("TrackingID"));
+                        map.put("CompanyID",array.getJSONObject(i).getString("CompanyID"));
+                        map.put("notes",array.getJSONObject(i).getString("notes"));
+                        map.put("loadnum", array.getJSONObject(i).getString("loadnum"));
+
+                        SyncRoutesList.add(map);
+                    }
+
+                    showRoutes();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -227,6 +227,11 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 Log.e(TAG, responseString + "/" + statusCode);
                 if (headers != null && headers.length > 0) {
+                    view.setVisibility(View.GONE);
+                    ll.setVisibility(View.GONE);
+                    ll2.setVisibility(View.GONE);
+
+                    functions.StringUtils.showDialog("No route found",getActivity());
                     for (int i = 0; i < headers.length; i++)
                         Log.e("here", headers[i].getName() + "//" + headers[i].getValue());
                 }
@@ -251,5 +256,25 @@ public class NavSyncFragment extends Fragment implements View.OnClickListener {
                 }
             }
         });
+    }
+
+    private void showRoutes() {
+        int size = SyncRoutesList.size();
+        for (int i=0;i<size;i++) {
+
+            LayoutInflater inflater = null;
+            inflater = (LayoutInflater) getActivity()
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View mLinearView = inflater.inflate(R.layout.sync_listitem, null);
+            TextView route_tv = (TextView) mLinearView.findViewById(R.id.route_tv);
+            TextView stop_tv = (TextView) mLinearView.findViewById(R.id.stop_tv);
+            TextView peices_tv = (TextView) mLinearView.findViewById(R.id.peices_tv);
+
+            route_tv.setText(SyncRoutesList.get(i).get("Route"));
+            stop_tv.setText(SyncRoutesList.get(i).get("StopNum"));
+            peices_tv.setText(SyncRoutesList.get(i).get("loadnum"));
+
+            listview.addView(mLinearView);
+        }
     }
 }
