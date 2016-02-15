@@ -19,5 +19,12 @@
 
  <color name="green">#00d210</color>
 
+ <color name="sync_color">#80aad5</color>
+ <color name="load_truck_color">#3973ac</color>
+ <color name="deliver_color">#254b72</color>
+ <color name="directions_color">#5abc82</color>
+ <color name="settings_color">#6a7486</color>
+ <color name="warehouse_color">#3a92cb</color>
+
 
 </resources>

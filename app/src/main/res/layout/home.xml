@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_margin="40dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:orientation="horizontal">
+
+
+    <LinearLayout
+        android:id="@+id/sync_layout"
+        android:layout_width="0dp"
+        android:background="@drawable/sync_background"
+        android:layout_height="match_parent"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/sync_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/bg_sync"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SYNC"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/white"/>
+        </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/load_layout"
+        android:layout_width="0dp"
+       android:background="@drawable/load_truck_background"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_marginBottom="20dp"
+        android:layout_weight="1">
+        <ImageView
+            android:id="@+id/load_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/bg_truck"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOAD TRUCK"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/white"/>
+
+        </LinearLayout>
+</LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/delivery_layout"
+            android:layout_width="0dp"
+            android:background="@drawable/deliver_backgorund"
+            android:layout_height="match_parent"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="1">
+            <ImageView
+                android:id="@+id/delivery_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/bg_delivery"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DELIVER"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/white"/>
+            </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/directions_layout"
+            android:layout_width="0dp"
+            android:background="@drawable/directions_background"
+            android:layout_marginLeft="20dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:layout_weight="1">
+            <ImageView
+                android:id="@+id/directions_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/bg_directions"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DIRECTIONS"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/white"/>
+            </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:id="@+id/settings_laoyut"
+            android:layout_width="0dp"
+            android:background="@drawable/settings_background"
+            android:layout_height="match_parent"
+            android:layout_marginRight="20dp"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:layout_marginBottom="20dp"
+            android:layout_weight="1">
+            <ImageView
+                android:id="@+id/settings_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/bg_settings"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SETTINGS"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/white"/>
+            </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/warehouse_layout"
+            android:layout_width="0dp"
+            android:background="@drawable/warehouse_backgeound"
+            android:layout_marginLeft="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:layout_weight="1">
+            <ImageView
+                android:id="@+id/warehouse_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/bg_warehouse"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="WAREHOUSE"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/white"/>
+            </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

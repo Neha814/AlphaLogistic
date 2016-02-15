@@ -1,5 +1,6 @@
 package alphalogistics.com.alphalogistics;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,10 +18,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import net.sourceforge.zbar.Symbol;
 
+import Fragments.HomeFragment;
 import Fragments.NavBluetoothScannerFragment;
 import Fragments.NavDeliverFragment;
 import Fragments.NavDiretionsFragment;
@@ -38,6 +42,16 @@ public class MainActivity extends AppCompatActivity
 
     private static final int GALLERY_IAMGE = 2;
     private static final int CAMERA_IMAGE = 3;
+
+    static NavigationView navigationView;
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,17 +80,17 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        navigationView.getMenu().getItem(5).setChecked(true);
+        //navigationView.getMenu().getItem(5).setChecked(true);
         AddInitialFragment();
     }
 
     private void AddInitialFragment() {
         Fragment fragment = null;
-        fragment = new NavWarehouseFragment();
-        String title = "Warehouse";
+        fragment = new HomeFragment();
+        String title = "Home";
 
         if (fragment != null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -116,8 +130,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
+        }*/
+         if(id==R.id.home){
+             AddInitialFragment();
         }
 
         return super.onOptionsItemSelected(item);
@@ -216,4 +233,10 @@ public class MainActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    public static void showFragment(int f) {
+
+        navigationView.getMenu().getItem(f).setChecked(true);
+    }
+
 }
