@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +35,7 @@ public class NavSettingsFragment extends Fragment implements View.OnClickListene
     EditText client_id_edt;
     Button save_btn, logout_btn;
     SharedPreferences sp;
+    String title;
 
     @Nullable
     @Override
@@ -67,6 +70,11 @@ public class NavSettingsFragment extends Fragment implements View.OnClickListene
             } else {
                 client_id_edt.setError("Please enter driver id first.");
             }
+            title  = "Home";
+            Fragment fragment = null;
+            fragment = new HomeFragment();
+            MainActivity.showFragment1(4);
+            showFragment(fragment);
         } else if(v==logout_btn){
             ShowLogoutDialog("Are you sure you want to logout ?");
         }
@@ -120,4 +128,16 @@ public class NavSettingsFragment extends Fragment implements View.OnClickListene
         getActivity().finish();
     }
 
+    private void showFragment(Fragment f) {
+        if (f != null) {
+            FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.content_frame, f);
+            //   ft.addToBackStack(null);
+            ft.commit();
+        }
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity.getSupportActionBar() != null) {
+            activity.getSupportActionBar().setTitle(title);
+        }
+    }
 }

@@ -38,11 +38,11 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int ZBAR_SCANNER_REQUEST = 0;
-    private static final int ZBAR_QR_SCANNER_REQUEST = 1;
+    /*private static final int ZBAR_QR_SCANNER_REQUEST = 1;
 
     private static final int GALLERY_IAMGE = 2;
     private static final int CAMERA_IMAGE = 3;
-
+*/
     static NavigationView navigationView;
 
 
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         //navigationView.getMenu().getItem(5).setChecked(true);
@@ -135,6 +135,15 @@ public class MainActivity extends AppCompatActivity
         }*/
          if(id==R.id.home){
              AddInitialFragment();
+
+             navigationView.getMenu().getItem(0).setChecked(false);
+             navigationView.getMenu().getItem(1).setChecked(false);
+             navigationView.getMenu().getItem(2).setChecked(false);
+             navigationView.getMenu().getItem(3).setChecked(false);
+             navigationView.getMenu().getItem(4).setChecked(false);
+             navigationView.getMenu().getItem(5).setChecked(false);
+             navigationView.getMenu().getItem(6).setChecked(false);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -235,8 +244,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static void showFragment(int f) {
-
-        navigationView.getMenu().getItem(f).setChecked(true);
+    navigationView.getMenu().getItem(f).setChecked(true);
+    }
+    public static void showFragment1(int f) {
+        navigationView.getMenu().getItem(f).setChecked(false);
     }
 
 }
