@@ -24,7 +24,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "BarcodeData";
 
     // Contacts table name
-    private static final String TABLE_CONTACTS = "barcodeTable";
+    private static final String WAREHOUSE_TABLE_CONTACTS = "warehouse_table";
+
+    private static final String LOADTRUCK_TABLE_CONTACTS = "loadtruck_table";
 
     // Contacts Table Columns names
     private static final String KEY_ID = "id";
@@ -39,24 +41,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_CONTACTS + "("
+        String CREATE_WAREHOUSE_TABLE = "CREATE TABLE " + WAREHOUSE_TABLE_CONTACTS + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_BARCODE + " TEXT,"
                 + KEY_DRIVERID + " TEXT,"+ KEY_MODIFIED + " TEXT," + KEY_ACTIVITY_TYPEID + " TEXT"+ ")";
-        db.execSQL(CREATE_CONTACTS_TABLE);
+        db.execSQL(CREATE_WAREHOUSE_TABLE);
+
+        String CREATE_LOADTRUCK_TABLE = "CREATE TABLE " + LOADTRUCK_TABLE_CONTACTS + "("
+                + KEY_ID + " INTEGER PRIMARY KEY," + KEY_BARCODE + " TEXT,"
+                + KEY_DRIVERID + " TEXT,"+ KEY_MODIFIED + " TEXT," + KEY_ACTIVITY_TYPEID + " TEXT"+ ")";
+        db.execSQL(CREATE_LOADTRUCK_TABLE);
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
+        db.execSQL("DROP TABLE IF EXISTS " + WAREHOUSE_TABLE_CONTACTS);
+
+        db.execSQL("DROP TABLE IF EXISTS " + LOADTRUCK_TABLE_CONTACTS);
         // Create tables again
         onCreate(db);
     }
 
 
     // Adding new data
-    public void addContact(BarcodeData data) {
+    public void addContact(BarcodeData data, String tableName) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -67,15 +76,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 
         // Inserting Row
-        db.insert(TABLE_CONTACTS, null, values);
+        db.insert(tableName, null, values);
         db.close(); // Closing database connection
     }
 
 
-    public List<BarcodeData> getAllContacts() {
+    public List<BarcodeData> getAllContacts(String tableName) {
         List<BarcodeData> contactList = new ArrayList<BarcodeData>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_CONTACTS;
+        String selectQuery = "SELECT  * FROM " + tableName;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -99,17 +108,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Deleting all contacts
-    public void deleteWholeData() {
+    public void deleteWholeData(String tableName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CONTACTS, null, null);
+        db.delete(tableName, null, null);
         db.close();
     }
 
-    // Deleting single contact
-    public void deleteSingleData(BarcodeData contact) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CONTACTS, KEY_ID + " = ?",
-                new String[] { String.valueOf(contact.getId()) });
-        db.close();
-    }
 }

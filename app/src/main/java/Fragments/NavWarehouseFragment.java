@@ -31,6 +31,7 @@ import java.util.ListIterator;
 
 import alphalogistics.com.alphalogistics.R;
 import database.DatabaseHandler;
+import functions.Constants;
 import model.BarcodeData;
 import qrscanner.ZBarConstants;
 import qrscanner.ZBarScannerActivity;
@@ -49,7 +50,7 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
     LinearLayout listview;
     View view;
     LinearLayout ll;
-
+    String TABLE_NAME="warehouse_table" ;
 
 
     @Nullable
@@ -92,7 +93,7 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
 
         listview.removeAllViews();
         DatabaseHandler db = new DatabaseHandler(getActivity());
-        contacts = db.getAllContacts();
+        contacts = db.getAllContacts(TABLE_NAME);
 
 
         if(contacts.size()>0){
@@ -131,6 +132,7 @@ public class NavWarehouseFragment extends Fragment implements View.OnClickListen
     public void onClick(View v) {
             if(v==camerascan_btn){
                 if (isCameraAvailable()) {
+                    Constants.COMING_FROM = "WAREHOUSE";
                     Intent intent = new Intent(getActivity(), ZBarScannerActivity.class);
                     intent.putExtra(ZBarConstants.SCAN_MODES, new int[]{Symbol.QRCODE,Symbol.NONE,
                             Symbol.PARTIAL,Symbol.EAN8,Symbol.UPCE,Symbol.ISBN10,Symbol.UPCA,Symbol.EAN13,

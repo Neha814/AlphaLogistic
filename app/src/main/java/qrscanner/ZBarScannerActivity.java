@@ -46,6 +46,7 @@ import java.util.List;
 import alphalogistics.com.alphalogistics.R;
 import cz.msebera.android.httpclient.Header;
 import database.DatabaseHandler;
+import functions.Constants;
 import functions.NetConnection;
 import functions.StringUtils;
 import model.BarcodeData;
@@ -76,6 +77,11 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
 
     DatabaseHandler db ;
 
+    String WAREOHOUSE_TABLE = "warehouse_table";
+    String LOADTRUCK_TABLE = "loadtruck_table";
+
+    String TABLENAME="" ;
+
 
     static {
         System.loadLibrary("iconv");
@@ -89,6 +95,12 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         isConnected = NetConnection.checkInternetConnectionn(getApplicationContext());
+
+        if(Constants.COMING_FROM.equalsIgnoreCase("WAREHOUSE")){
+            TABLENAME = WAREOHOUSE_TABLE;
+        }else if(Constants.COMING_FROM.equalsIgnoreCase("LOADTRUCK")){
+            TABLENAME = LOADTRUCK_TABLE;
+        }
 
         setContentView(R.layout.barcode_content);
 
@@ -261,12 +273,12 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         String formattedDate = df.format(c.getTime());
 
-        db.addContact(new BarcodeData(symData, sp.getString("client_id", ""), formattedDate, "37"));
+        db.addContact(new BarcodeData(symData, sp.getString("client_id", ""), formattedDate, "37"),TABLENAME);
     }
 
     private void putDataInAnArray() {
         DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-        List<BarcodeData> contacts = db.getAllContacts();
+        List<BarcodeData> contacts = db.getAllContacts(TABLENAME);
         for(int i=0;i<contacts.size();i++){
             JSONObject object = new JSONObject();
             try{
@@ -291,7 +303,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         if(isConnected) {
             submitScannedData();
         }else {
-            StringUtils.showDialog("No internet connecyion.Please try again",getApplicationContext());
+            StringUtils.showDialog("No internet connection.Please try again",getApplicationContext());
         }
     }
 
@@ -309,8 +321,6 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
         Camera.Parameters p = mCamera.getParameters();
         p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
         mCamera.setParameters(p);
-
-
 
         RecreateSurface();
         OpenCamera();
@@ -340,7 +350,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
           finish();
       }else if(v==sync_btn){
           DatabaseHandler db = new DatabaseHandler(getApplicationContext());
-          List<BarcodeData> contacts = db.getAllContacts();
+          List<BarcodeData> contacts = db.getAllContacts(TABLENAME);
           if(contacts.size()<1){
               Toast.makeText(getApplicationContext(), "No data available to sync.", Toast.LENGTH_SHORT).show();
           } else {
@@ -393,7 +403,7 @@ public class ZBarScannerActivity extends Activity implements Camera.PreviewCallb
                         Log.e("here", headers[i].getName() + "//" + headers[i].getValue());
                 }
 
-                db.deleteWholeData();
+                db.deleteWholeData(TABLENAME);
                 showDialog("Data synced successfully.", ZBarScannerActivity.this);
 
             }

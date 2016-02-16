@@ -9,9 +9,9 @@
 
 
     <item android:id="@+id/home" android:title="@string/home"
-        android:icon="@drawable/home"
-        android:orderInCategory="100"
-        app:showAsAction="always" />
+    android:icon="@drawable/home"
+    android:orderInCategory="100"
+    app:showAsAction="always" />
 
 </menu>
     <!-- android:icon="@android:drawable/ic_menu_home"-->
